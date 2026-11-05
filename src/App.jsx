@@ -44,17 +44,18 @@ const students = [
 ]
 
 function App() {
-  const [search, setSearch] = useState('')
+  const [nameSearch, setNameSearch] = useState('')
+  const [majorSearch, setMajorSearch] = useState('')
 
   const { theme } = useContext(ThemeContext)
 
   const filteredStudents = useMemo(() => {
     return students.filter(
       (student) =>
-        student.name.includes(search) ||
-        student.major.includes(search)
+        student.name.includes(nameSearch) &&
+        student.major.includes(majorSearch)
     )
-  }, [search])
+  }, [nameSearch, majorSearch])
 
   const averageScore = useMemo(() => {
     if (filteredStudents.length === 0) {
@@ -72,7 +73,8 @@ function App() {
   }, [filteredStudents])
 
   const clearSearch = useCallback(() => {
-    setSearch('')
+    setNameSearch('')
+    setMajorSearch('')
   }, [])
 
   return (
@@ -86,15 +88,24 @@ function App() {
       <Header />
 
       <section className="search-box">
-        <label>학생 이름 또는 전공 검색</label>
+        <label>학생 검색</label>
 
         <div className="search-row">
           <input
             type="text"
-            placeholder="학생 이름 또는 전공 입력"
-            value={search}
+            placeholder="학생 이름 입력"
+            value={nameSearch}
             onChange={(e) =>
-              setSearch(e.target.value)
+              setNameSearch(e.target.value)
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="전공 입력"
+            value={majorSearch}
+            onChange={(e) =>
+              setMajorSearch(e.target.value)
             }
           />
 
