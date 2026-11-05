@@ -1,273 +1,150 @@
-import { useEffect, useRef, useState } from 'react'
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useContext,
+} from 'react'
+
 import './App.css'
+import Header from './Header.jsx'
+import StudentList from './StudentList.jsx'
+import { ThemeContext } from './ThemeContext.jsx'
+
+const students = [
+  {
+    id: 1,
+    name: '이규원',
+    major: '멀티미디어',
+    score: 85,
+  },
+  {
+    id: 2,
+    name: '안민혁',
+    major: '멀티미디어',
+    score: 92,
+  },
+  {
+    id: 3,
+    name: '임현지',
+    major: '멀티미디어',
+    score: 76,
+  },
+  {
+    id: 4,
+    name: '이재경',
+    major: '멀티미디어',
+    score: 88,
+  },
+  {
+    id: 5,
+    name: '이정원',
+    major: '멀티미디어',
+    score: 95,
+  },
+]
 
 function App() {
-  // 학생 이름, 출석 상태, 메모
-  const [name, setName] = useState('')
-  const [attendance, setAttendance] = useState('출석')
-  const [memo, setMemo] = useState('')
+  const [search, setSearch] = useState('')
 
-  // 전체 학생 목록
-  const [students, setStudents] = useState([])
+  const { theme } = useContext(ThemeContext)
 
-  // 결과 메시지
-  const [message, setMessage] = useState('')
+  const filteredStudents = useMemo(() => {
+    return students.filter((student) =>
+      student.name.includes(search)
+    )
+  }, [search])
 
-  // 현재 시간
-  const [currentTime, setCurrentTime] = useState(new Date())
-
-  // 이름 입력창
-  const nameInputRef = useRef(null)
-
-  // 현재 시간 1초마다 갱신
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [])
-
-  // 화면 처음 실행 시 이름 입력창 선택
-  useEffect(() => {
-    if (nameInputRef.current) {
-      nameInputRef.current.focus()
-    }
-  }, [])
-
-  // 학생 추가
-  const addStudent = () => {
-    if (name === '') {
-      setMessage('학생 이름을 입력하세요.')
-      nameInputRef.current.focus()
-      return
+  const averageScore = useMemo(() => {
+    if (filteredStudents.length === 0) {
+      return 0
     }
 
-    const newStudent = {
-      id: Date.now(),
-      name: name,
-      attendance: attendance,
-      memo: memo,
-    }
-
-    const updatedStudents = students.concat(newStudent)
-
-    setStudents(updatedStudents)
-    setMessage('학생이 등록되었습니다.')
-
-    setName('')
-    setAttendance('출석')
-    setMemo('')
-
-    nameInputRef.current.focus()
-  }
-
-  // 학생 삭제
-  const deleteStudent = (id) => {
-    const updatedStudents = students.filter(
-      (student) => student.id !== id
+    const total = filteredStudents.reduce(
+      (sum, student) => sum + student.score,
+      0
     )
 
-    setStudents(updatedStudents)
-    setMessage('학생 정보가 삭제되었습니다.')
-  }
+    return Math.round(
+      total / filteredStudents.length
+    )
+  }, [filteredStudents])
 
-  // 전체 학생 초기화
-  const clearStudents = () => {
-    setStudents([])
-    setMessage('전체 학생 목록을 초기화했습니다.')
-
-    if (nameInputRef.current) {
-      nameInputRef.current.focus()
-    }
-  }
-
-  // 출석 상태별 학생 수
-  const presentStudents = students.filter(
-    (student) => student.attendance === '출석'
-  )
-
-  const lateStudents = students.filter(
-    (student) => student.attendance === '지각'
-  )
-
-  const absentStudents = students.filter(
-    (student) => student.attendance === '결석'
-  )
+  const clearSearch = useCallback(() => {
+    setSearch('')
+  }, [])
 
   return (
-    <main className="page">
-      {/* 제목 */}
-      <h1>학생 출석·메모 관리</h1>
+    <main
+      className={
+        theme === 'light'
+          ? 'page light'
+          : 'page dark'
+      }
+    >
+      <div className="content">
+        <Header />
 
-      {/* 현재 시간 */}
-      <section className="time-box">
-        <span>현재 시간</span>
-
-        <strong>
-          {currentTime.toLocaleTimeString()}
-        </strong>
-      </section>
-
-      {/* 학생 입력 */}
-      <section className="form-box">
-        <h2>학생 등록</h2>
-
-        {/* 학생 이름 */}
-        <div className="form-group">
-          <label>학생 이름</label>
-
-          <input
-            ref={nameInputRef}
-            type="text"
-            placeholder="학생 이름 입력"
-            value={name}
-            onChange={(e) =>
-              setName(e.target.value)
-            }
-          />
-        </div>
-
-        {/* 출석 상태 */}
-        <div className="form-group">
-          <label>출석 상태</label>
-
-          <select
-            value={attendance}
-            onChange={(e) =>
-              setAttendance(e.target.value)
-            }
-          >
-            <option value="출석">
-              출석
-            </option>
-
-            <option value="지각">
-              지각
-            </option>
-
-            <option value="결석">
-              결석
-            </option>
-          </select>
-        </div>
-
-        {/* 메모 */}
-        <div className="form-group">
-          <label>메모</label>
-
-          <textarea
-            placeholder="메모 입력"
-            value={memo}
-            onChange={(e) =>
-              setMemo(e.target.value)
-            }
-          ></textarea>
-        </div>
-
-        {/* 학생 추가 버튼 */}
-        <button
-          className="add-button"
-          onClick={addStudent}
-        >
-          학생 추가
-        </button>
-
-        {/* 결과 메시지 */}
-        {message !== '' && (
-          <p className="message">
-            {message}
+        <section className="intro-box">
+          <p className="intro-label">
+            STUDENT SEARCH
           </p>
-        )}
-      </section>
 
-      {/* 출석 현황 */}
-      <section className="summary-box">
-        <h2>출석 현황</h2>
+          <h2>멀티미디어 학생 검색</h2>
 
-        <div className="summary-list">
-          <div>
-            <span>전체</span>
-            <strong>
-              {students.length}명
-            </strong>
-          </div>
-
-          <div>
-            <span>출석</span>
-            <strong>
-              {presentStudents.length}명
-            </strong>
-          </div>
-
-          <div>
-            <span>지각</span>
-            <strong>
-              {lateStudents.length}명
-            </strong>
-          </div>
-
-          <div>
-            <span>결석</span>
-            <strong>
-              {absentStudents.length}명
-            </strong>
-          </div>
-        </div>
-      </section>
-
-      {/* 학생 목록 */}
-      <section className="student-box">
-        <div className="student-header">
-          <h2>학생 목록</h2>
-
-          <button onClick={clearStudents}>
-            전체 초기화
-          </button>
-        </div>
-
-        {/* 학생이 없을 경우 */}
-        {students.length === 0 && (
-          <p className="empty-message">
-            등록된 학생이 없습니다.
+          <p>
+            학생 이름을 입력해 정보를 빠르게 찾아보세요.
           </p>
-        )}
+        </section>
 
-        {/* 학생 목록 반복 출력 */}
-        {students.map((student) => (
-          <article
-            className="student-card"
-            key={student.id}
-          >
+        <section className="search-box">
+          <label>학생 이름 검색</label>
+
+          <div className="search-row">
+            <input
+              type="text"
+              placeholder="학생 이름을 입력하세요"
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+            />
+
+            <button onClick={clearSearch}>
+              초기화
+            </button>
+          </div>
+
+          <div className="search-info">
             <div>
-              <h3>{student.name}</h3>
-
-              <p>
-                출석 상태 :{' '}
-                {student.attendance}
-              </p>
-
-              <p>
-                메모 :{' '}
-                {student.memo === ''
-                  ? '없음'
-                  : student.memo}
-              </p>
+              <span>검색 결과</span>
+              <strong>
+                {filteredStudents.length}명
+              </strong>
             </div>
 
-            <button
-              className="delete-button"
-              onClick={() =>
-                deleteStudent(student.id)
-              }
-            >
-              삭제
-            </button>
-          </article>
-        ))}
-      </section>
+            <div>
+              <span>평균 점수</span>
+              <strong>
+                {averageScore}점
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <StudentList
+          students={filteredStudents}
+        />
+
+        {filteredStudents.length === 0 && (
+          <div className="empty-box">
+            검색 결과가 없습니다.
+          </div>
+        )}
+
+        <footer>
+          Multimedia Student Search System
+        </footer>
+      </div>
     </main>
   )
 }
