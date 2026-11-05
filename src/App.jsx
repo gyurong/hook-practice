@@ -20,7 +20,7 @@ const students = [
   {
     id: 2,
     name: '안민혁',
-    major: '멀티미디어',
+    major: '치이카와전공',
     score: 92,
   },
   {
@@ -32,7 +32,7 @@ const students = [
   {
     id: 4,
     name: '이재경',
-    major: '멀티미디어',
+    major: '컴퓨터공학과',
     score: 88,
   },
   {
@@ -49,8 +49,10 @@ function App() {
   const { theme } = useContext(ThemeContext)
 
   const filteredStudents = useMemo(() => {
-    return students.filter((student) =>
-      student.name.includes(search)
+    return students.filter(
+      (student) =>
+        student.name.includes(search) ||
+        student.major.includes(search)
     )
   }, [search])
 
@@ -81,70 +83,35 @@ function App() {
           : 'page dark'
       }
     >
-      <div className="content">
-        <Header />
+      <Header />
 
-        <section className="intro-box">
-          <p className="intro-label">
-            STUDENT SEARCH
-          </p>
+      <section className="search-box">
+        <label>학생 이름 또는 전공 검색</label>
 
-          <h2>멀티미디어 학생 검색</h2>
+        <div className="search-row">
+          <input
+            type="text"
+            placeholder="학생 이름 또는 전공 입력"
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+          />
 
-          <p>
-            학생 이름을 입력해 정보를 빠르게 찾아보세요.
-          </p>
-        </section>
+          <button onClick={clearSearch}>
+            검색 초기화
+          </button>
+        </div>
 
-        <section className="search-box">
-          <label>학생 이름 검색</label>
+        <p className="search-result">
+          검색 결과 {filteredStudents.length}명 · 평균 점수{' '}
+          {averageScore}점
+        </p>
+      </section>
 
-          <div className="search-row">
-            <input
-              type="text"
-              placeholder="학생 이름을 입력하세요"
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-            />
-
-            <button onClick={clearSearch}>
-              초기화
-            </button>
-          </div>
-
-          <div className="search-info">
-            <div>
-              <span>검색 결과</span>
-              <strong>
-                {filteredStudents.length}명
-              </strong>
-            </div>
-
-            <div>
-              <span>평균 점수</span>
-              <strong>
-                {averageScore}점
-              </strong>
-            </div>
-          </div>
-        </section>
-
-        <StudentList
-          students={filteredStudents}
-        />
-
-        {filteredStudents.length === 0 && (
-          <div className="empty-box">
-            검색 결과가 없습니다.
-          </div>
-        )}
-
-        <footer>
-          Multimedia Student Search System
-        </footer>
-      </div>
+      <StudentList
+        students={filteredStudents}
+      />
     </main>
   )
 }
