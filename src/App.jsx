@@ -9,39 +9,7 @@ import './App.css'
 import Header from './Header.jsx'
 import StudentList from './StudentList.jsx'
 import { ThemeContext } from './ThemeContext.jsx'
-
-const students = [
-  {
-    id: 1,
-    name: '이규원',
-    major: '멀티미디어',
-    score: 85,
-  },
-  {
-    id: 2,
-    name: '안민혁',
-    major: '치이카와전공',
-    score: 92,
-  },
-  {
-    id: 3,
-    name: '임현지',
-    major: '멀티미디어',
-    score: 76,
-  },
-  {
-    id: 4,
-    name: '이재경',
-    major: '컴퓨터공학과',
-    score: 88,
-  },
-  {
-    id: 5,
-    name: '이정원',
-    major: '멀티미디어',
-    score: 95,
-  },
-]
+import students from './students.json'
 
 function App() {
   const [nameSearch, setNameSearch] = useState('')
@@ -120,9 +88,25 @@ function App() {
         </p>
       </section>
 
-      <StudentList
-        students={filteredStudents}
-      />
+      <StudentList students={filteredStudents} />
+
+      <footer className="footer">
+        <p>
+          개인정보처리방침
+          {' | '}
+          이용약관
+          {' | '}
+          <a
+            href="https://home.chungwoon.ac.kr/intro/index.do"
+            target="_blank"
+            rel="noreferrer"
+          >
+            학교 홈페이지
+          </a>
+        </p>
+
+        <p>© 2026 Student Search System</p>
+      </footer>
     </main>
   )
 }
